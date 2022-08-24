@@ -50,9 +50,11 @@ mongoose.connect(MONGO).then(() => {
           const mediaImgQT = await msgQT.downloadMedia();
           chat.sendMessage(mediaImgQT, {sendMediaAsSticker: true});
         }else if(typeQT==="video"){
-          msgQT.reply("send this gif with caption ```sticker```");
+          msg.reply("send the gif with caption ```sticker```");
         }
       }
+    }else if(body==="alive" || body==="Alive"){
+      msg.reply("yes 🐤");
     }
   });
   console.log("<<:Cliend Initialized:>>");
