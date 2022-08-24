@@ -35,7 +35,6 @@ mongoose.connect(MONGO).then(() => {
     const chat = await msg.getChat();
     const group = await chat.isGroup;
     const type = await msg.type;
-    const hasGif = await msg.isGif;
     const hasQT = await msg.hasQuotedMsg;
     if(body==="sticker" || body==="Sticker"){
       if(type==="image"){
@@ -47,12 +46,12 @@ mongoose.connect(MONGO).then(() => {
       }else if(type==="chat" && hasQT){
         const msgQT = await msg.getQuotedMessage();
         const typeQT = await msgQT.type;
-        const hasGifQT = await msgQT.isGif;
         if(typeQT==="image"){
           const mediaImgQT = await msgQT.downloadMedia();
           chat.sendMessage(mediaImgQT, {sendMediaAsSticker: true});
-        }else if(hasGifQT){
-          chat.sendMessage(typeQT);
+        }else if(typeQT==="video"){
+          const mkMedia = await msgQT.downloadMedia();
+          chat.sendMessage(mkMedia);
         }
       }
     }
