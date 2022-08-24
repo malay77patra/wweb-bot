@@ -50,7 +50,7 @@ mongoose.connect(MONGO).then(() => {
           const mediaImgQT = await msgQT.downloadMedia();
           chat.sendMessage(mediaImgQT, {sendMediaAsSticker: true});
         }else if(typeQT==="video"){
-          chat.sendMessage("send this gif with caption ```sticker```");
+          msgQT.relply("send this gif with caption ```sticker```");
         }
       }
     }
