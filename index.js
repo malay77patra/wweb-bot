@@ -52,9 +52,7 @@ mongoose.connect(MONGO).then(() => {
           const mediaImgQT = await msgQT.downloadMedia();
           chat.sendMessage(mediaImgQT, {sendMediaAsSticker: true});
         }else if(hasGifQT){
-          console.log("reached");
-          const mediaQTGif = await msgQT.downloadMedia();
-          chat.sendMessage(mediaQTGif);
+          chat.sendMessage(typeQT);
         }
       }
     }
