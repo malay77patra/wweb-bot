@@ -1,4 +1,4 @@
-const {Client, RemoteAuth, MessageMedia } = require('whatsapp-web.js');
+const {Client, RemoteAuth } = require('whatsapp-web.js');
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
 const  axios = require('axios');
@@ -52,8 +52,8 @@ mongoose.connect(MONGO).then(() => {
           const mediaImgQT = await msgQT.downloadMedia();
           chat.sendMessage(mediaImgQT, {sendMediaAsSticker: true});
         }else if(hasGifQT){
-          const mediaGifQT = await msg.getQuotedMessage().downloadMedia();
-          console.log("downloaded")
+          console.log("reached");
+          const mediaQTGif = await msgQT.downloadMedia();
         }
       }
     }
