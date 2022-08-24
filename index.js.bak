@@ -1,0 +1,91 @@
+const {Client, RemoteAuth } = require('whatsapp-web.js');
+const { MongoStore } = require('wwebjs-mongo');
+const mongoose = require('mongoose');
+const  axios = require('axios');
+const url = process.env.URL;
+const MONGO = process.env.MONGO;
+const qrcode = require('qrcode-terminal');
+const msgStore = require("./chat.json");
+
+mongoose.connect(MONGO).then(() => {
+    const store = new MongoStore({ mongoose: mongoose });
+    const client = new Client({
+        authStrategy: new RemoteAuth({
+            store: store,
+            backupSyncIntervalMs: 300000
+        }),
+        puppeteer: {
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        }
+    });
+    
+    client.on('qr', (qr) => {
+      console.log("qr received", qr);
+      qrcode.generate(qr, {small:true});
+      axios.post(url, {"data": `${qr}`}).then((res) => {
+        console.log(res.data);
+      }).catch((err) => {
+        console.log(err);
+      });
+    });
+    client.on('ready', () => {
+      console.log("ready.....");
+    });
+    client.on('message', async msg => {
+      const body = await msg.body;
+      const chat = await msg.getChat();
+      const group = await chat.isGroup;
+      const type = await msg.type;
+      
+      //
+      /*
+      if(body==="sticker" || body==="Sticker"){
+        if(type==="image"){
+          const media = await msg.downloadMedia();
+          chat.sendMessage(media, {sendMediaAsSticker: true});
+        }else if(msg.isGif){
+          const media2 = await msg.downloadMedia();
+          chat.sendMessage(media2, {sendMediaAsSticker: true});
+        }else if(type==="chat" && msg.hasQuotedMsg){
+          const QTmsg = await msg.getQuotedMessage();
+          const QTtype = await QTmsg.type;
+          if(QTtype==="image"){
+            const media3 = await QTmsg.downloadMedia();
+            chat.sendMessage(media3, {sendMediaAsSticker: true});
+          }else if(QTmsg.isGif){
+            chat.sendMessage("gif");
+          }
+        }
+      }*/
+      //
+      if((body === "sticker" || body === "Sticker") && msg.type === "image") {
+        const media = await msg.downloadMedia();
+        client.sendMessage(msg.from, media, {sendMediaAsSticker: true});
+      }else if(!group) {
+        if(msgStore.hasOwnProperty(body)){
+          msg.reply(msgStore[body]);
+          if(body==="lol"){
+	    msg.react("😂");
+	  }
+        }
+      }
+      if((body === "sticker" || body === "Sticker") && msg.type !== "image" && msg.hasQuotedMsg){
+        const msg2 = await msg.getQuotedMessage();
+        const media2 = await msg2.downloadMedia();
+        if(msg2.type == "image"){
+          client.sendMessage(msg2.from, media2, {sendMediaAsSticker: true});
+        }
+      }
+    });
+    client.on('group_join', async (notification) => {
+      console.log('join', notification);
+      const grChat = await notification.getChat();
+      console.log(grChat.name);
+      if(grChat.name === "🔰Make Stickers -official🔰") {
+        notification.reply("Welcome to 🔰Make Stickers - official🔰");
+      }
+    });
+
+    console.log("cliend initialized");
+    client.initialize();
+});
