@@ -41,7 +41,7 @@ mongoose.connect(MONGO).then(() => {
       if(type==="image"){
         const mediaImg = await msg.downloadMedia();
         chat.sendMessage(mediaImg, {sendMediaAsSticker: true});
-      }else if(hasGif){
+      }else if(type==="video"){
         const mediaGif = await msg.downloadMedia();
         chat.sendMessage(mediaGif, {sendMediaAsSticker: true});
       }else if(type==="chat" && hasQT){
