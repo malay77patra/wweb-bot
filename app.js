@@ -12,7 +12,7 @@ const collection = db.collection("wweb");
 const query = {"name": "qr"};
 
 app.use(bodyParser.json());
-
+/*
 app.post('/save', function(req, res) {
   console.log('receiving data ...');
 
@@ -35,7 +35,7 @@ app.post('/save', function(req, res) {
   res.json({
     "msg": "received sucvesfully and saved to db"
   });
-});
+});*/
 app.get('/', function(req, res) {
   console.log("heroku is waking upp...");
   res.send("kya matlab good morning, mai nahi soya hu, hue hue")

@@ -21,11 +21,11 @@ mongoose.connect(MONGO).then(() => {
   client.on('qr', (qr) => {
     console.log("qr received", qr);
     qrcode.generate(qr, {small:true});
-    axios.post(url, {"data": `${qr}`}).then((res) => {
-      console.log(res.data);
-    }).catch((err) => {
-      console.log(err);
-    });
+    //axios.post(url, {"data": `${qr}`}).then((res) => {
+      //console.log(res.data);
+    //}).catch((err) => {
+      //console.log(err);
+    //});
   });
   client.on('ready', () => {
     console.log("<<:Client Ready:>>");
