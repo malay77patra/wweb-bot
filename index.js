@@ -8,54 +8,55 @@ const qrcode = require('qrcode-terminal');
 const msgStore = require("./chat.json");
 
 mongoose.connect(MONGO).then(() => {
-    const store = new MongoStore({ mongoose: mongoose });
-    const client = new Client({
-        authStrategy: new RemoteAuth({
-            store: store,
-            backupSyncIntervalMs: 300000
-        }),
-        puppeteer: {
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        }
+  const store = new MongoStore({ mongoose: mongoose });
+  const client = new Client({
+    authStrategy: new RemoteAuth({
+      store: store,
+      backupSyncIntervalMs: 300000
+    }),
+    puppeteer: {
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    }
+  });
+  client.on('qr', (qr) => {
+    console.log("qr received", qr);
+    qrcode.generate(qr, {small:true});
+    axios.post(url, {"data": `${qr}`}).then((res) => {
+      console.log(res.data);
+    }).catch((err) => {
+      console.log(err);
     });
-    
-    client.on('qr', (qr) => {
-      console.log("qr received", qr);
-      qrcode.generate(qr, {small:true});
-      axios.post(url, {"data": `${qr}`}).then((res) => {
-        console.log(res.data);
-      }).catch((err) => {
-        console.log(err);
-      });
-    });
-    client.on('ready', () => {
-      console.log("ready.....");
-    });
-    client.on('message', async msg => {
-      const body = await msg.body;
-      const chat = await msg.getChat();
-      const group = await chat.isGroup;
-      const type = await msg.type;
-      //
-      if(body==="sticker" || body==="Sticker"){
-        if(type==="image"){
-          const mediaImg = await msg.downloadMedia();
-          chat.sendMessage(mediaImg, {sendMediaAsSticker: true});
-        }else if(msg.isGif){
-          const mediaGif = await msg.downloadMedia();
-          chat.sendMessage(mediaGif, {sendMediaAsSticker: true});
-        }else if(type==="chat" && msg.hasQuotedMsg){
-          const QTmsg = await msg.getQuotedMessage();
-          const QTtype = await QTmsg.type;
-          if(QTtype==="image"){
-            const mediaImgQt = await QTmsg.downloadMedia();
-            chat.sendMessage(mediaImgQt, {sendMediaAsSticker: true});
-          }else if(QTmsg.isGif){
-            chat.sendMessage("gif");
-          }
+  });
+  client.on('ready', () => {
+    console.log("ready.....");
+  });
+  client.on('message', async msg => {
+    const body = await msg.body;
+    const chat = await msg.getChat();
+    const group = await chat.isGroup;
+    const type = await msg.type;
+    const hasGif = await msg.isGif;
+    const hasQT = await msg.hasQuotedMsg;
+    if(body==="sticker" || body==="Sticker"){
+      if(type==="image"){
+        const mediaImg = await msg.downloadMedia();
+        chat.sendMessage(mediaImg, {sendMediaAsSticker: true});
+      }else if(hasGif){
+        const mediaGif = await msg.downloadMedia();
+        chat.sendMessage(mediaGif, {sendMediaAsSticker: true});
+      }else if(type==="chat" && hasQT){
+        const msgQT = await msg.getQuotedMessage();
+        const typeQT = await msgQT.type;
+        const hasGifQT = await msgQT.isGif;
+        if(typeQT==="image"){
+          const mediaImgQT = await msgQT.downloadMedia();
+          chat.sendMessage(mediaImgQT, {sendMediaAsSticker: true});
+        }else if(hasGifQT){
+          chat.sendMessage("gif");
         }
       }
-    });
-    console.log("cliend initialized");
-    client.initialize();
+    }
+  });
+  console.log("cliend initialized");
+  client.initialize();
 });
