@@ -28,7 +28,7 @@ mongoose.connect(MONGO).then(() => {
     });
   });
   client.on('ready', () => {
-    console.log("ready.....");
+    console.log("<<:Client Ready:>>");
   });
   client.on('message', async msg => {
     const body = await msg.body;
@@ -52,11 +52,12 @@ mongoose.connect(MONGO).then(() => {
           const mediaImgQT = await msgQT.downloadMedia();
           chat.sendMessage(mediaImgQT, {sendMediaAsSticker: true});
         }else if(hasGifQT){
-          chat.sendMessage("gif");
+          const mediaGifQT = await msgQT.downloadMedia();
+          chat.sendMessage(mediaGifQT, {sendMediaAsSticker: true});
         }
       }
     }
   });
-  console.log("cliend initialized");
+  console.log("<<:Cliend Initialized:>>");
   client.initialize();
 });
